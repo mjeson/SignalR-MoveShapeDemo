@@ -16,20 +16,24 @@ namespace MoveShape.Web.MoveShape
         {
             Clients.Others.shapeMoved(x, y);
         }
-        
+
         public override Task OnConnected()
         {
+            if (Context.QueryString["transport"] == "webSockets")
+            {
+                return Clients.Caller.changeTransport("longPolling");
+            }
             _connections.TryAdd(Context.ConnectionId, null);
             return Clients.All.clientCountChanged(_connections.Count);
         }
-        
+
         public override Task OnReconnected()
         {
             _connections.TryAdd(Context.ConnectionId, null);
             return Clients.All.clientCountChanged(_connections.Count);
         }
 
-        public override Task OnDisconnected()
+        public override Task OnDisconnected(bool stopCalled)
         {
             object value;
             _connections.TryRemove(Context.ConnectionId, out value);

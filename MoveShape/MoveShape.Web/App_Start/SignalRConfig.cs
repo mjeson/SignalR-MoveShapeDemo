@@ -11,7 +11,7 @@ namespace MoveShape.Web
     {
         public static void ConfigureSignalR(RouteCollection routes, IDependencyResolver dependencyResolver)
         {
-            routes.MapHubs();
+            //routes.MapHubs();
         }
     }
 }

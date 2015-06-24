@@ -1,7 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Shapes;
+using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNet.SignalR.Client.Hubs;
+using Microsoft.AspNet.SignalR.Client.Transports;
 
 namespace MoveShape.Desktop
 {
@@ -28,13 +30,24 @@ namespace MoveShape.Desktop
                     Canvas.SetTop(Shape, (Body.ActualHeight - Shape.ActualHeight) * y);
                 })
             );
-            
+
             hub.On<int>("clientCountChanged", count =>
                 Dispatcher.InvokeAsync(() =>
                     ClientCount.Text = count.ToString()));
 
+            hub.On<string>("changeTransport", transportName =>
+                Dispatcher.InvokeAsync(() =>
+                {
+                    this.Title = transportName;
+                    hubConnection.Stop();
+                    if (transportName == "longPolling")
+                    {
+                        hubConnection.Start(new LongPollingTransport());
+                    }
+                }));
+
             await hubConnection.Start();
-            
+
             Shape.Draggable((left, top) =>
                 hub.Invoke("MoveShape",
                     left / (Body.ActualWidth - Shape.ActualWidth),
